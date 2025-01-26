@@ -17,7 +17,6 @@ router.post('/', authMiddleware, upload.single('resume'), async (req, res) => {
         return res.status(400).json({ message: 'No file uploaded.' });
     }
 
-
     const application = new Application({
         initiatorId: userId, // Store the initiator's ID
         resume: req.file.buffer, // Access the file buffer
@@ -46,45 +45,54 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 });
 
-
+// Send application to approver
 router.put('/:id/send-to-approver', authMiddleware, async (req, res) => {
-    console.log("Request Body:", req.body); // Log the request body
-    const { remark } = req.body; // Only get the remark from the request body
+    const applicationId = req.params.id; // Get the application ID from the request parameters
+    const { remark } = req.body; // Get the remark from the request body
 
     try {
-        const application = await Application.findById(req.params.id);
-        if (!application) return res.status(404).json({ message: 'Application not found' });
+        const application = await Application.findById(applicationId);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
 
-        // Update application status and add remark
-        application.status = 'pending approval'; // Update status
-        application.remarks.push({ remark, reviewerId: req.user.id }); // Add remark
-        await application.save();
-        res.status(200).json({ message: 'Application sent to approver' });
+        // Update the application status and add the remark
+        application.status = 'pending approval'; // Change status to pending approval
+        application.remarks.push({ remark, reviewerId: req.user._id }); // Add the remark with reviewer ID
+
+        await application.save(); // Save the updated application
+        res.status(200).json({ message: 'Application sent to approver successfully' });
     } catch (error) {
         console.error('Error sending application to approver:', error);
-        res.status(500).json({ message: 'Error processing request', error: error.message });
+        res.status(500).json({ message: 'Error sending application to approver' });
     }
 });
-// Provide remark
-router.put('/:id/remark', authMiddleware, async (req, res) => {
-    const { remark } = req.body;
-    try {
-        const application = await Application.findById(req.params.id);
-        if (!application) return res.status(404).json({ message: 'Application not found' });
 
-        // Add remark to the application
-        application.remarks.push({ remark, reviewerId: req.user.id }); // Add remark
-        application.status = 'unselected'; // Update status
-        await application.save();
-        res.status(200).json({ message: 'Remark submitted to user' });
+// Provide remark and delete application
+router.put('/:id/remark', authMiddleware, async (req, res) => {
+    const applicationId = req.params.id; // Get the application ID from the request parameters
+    const { remark } = req.body; // Get the remark from the request body
+
+    try {
+        const application = await Application.findById(applicationId);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        // Add the remark
+        application.remarks.push({ remark, reviewerId: req.user._id }); // Add the remark with reviewer ID
+
+        await application.save(); // Save the updated application
+
+        // Delete the application after providing a remark
+        await application.remove(); // Remove the application from the database
+
+        res.status(200).json({ message: 'Remark submitted and application deleted successfully' });
     } catch (error) {
         console.error('Error providing remark:', error);
-        res.status(500).json({ message: 'Error processing request' });
+        res.status(500).json({ message: 'Error providing remark' });
     }
 });
-
-// Approve application
-// In your ApplicationRoutes.js
 router.put('/:id/approve', authMiddleware, async (req, res) => {
     const reviewerId = req.user._id;
     console.log('Approving application by reviewer ID:', reviewerId);
@@ -139,7 +147,7 @@ router.get('/pending', authMiddleware, async (req, res) => {
 // Route to get approved applications
 router.get('/approved', async (req, res) => {
     try {
-        const approvedApplications = await Application.find({ status: 'approved' });
+        const approvedApplications = await Application.find({ status: 'approved' }).populate('initiatorId');;
         console.log('Approved applications found:', approvedApplications); 
         res.status(200).json(approvedApplications);
     } catch (error) {
@@ -147,6 +155,22 @@ router.get('/approved', async (req, res) => {
         res.status(500).json({ message: 'Error fetching approved applications' });
     }
 });
+// Delete application
+// router.delete('/:id', authMiddleware, async (req, res) => {
+//     const applicationId = req.params.id; // Get the application ID from the request parameters
 
+//     try {
+//         const application = await Application.findById(applicationId);
+//         if (!application) {
+//             return res.status(404).json({ message: 'Application not found' });
+//         }
+
+//         await application.remove(); // Delete the application
+//         res.status(200).json({ message: 'Application deleted successfully' });
+//     } catch (error) {
+//         console.error('Error deleting application:', error);
+//         res.status(500).json({ message: 'Error deleting application' });
+//     }
+// });
 // Export the router
 module.exports = router;

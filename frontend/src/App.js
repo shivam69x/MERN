@@ -7,7 +7,7 @@ import ApplicationForm from './components/ApplicationForm';
 import Review from './components/Review';
 import UserProfile from './components/UserProfile';
 import Notifications from './components/Notifications';
-
+import ProtectedRoute from './ProtectedRoute';
 import UserDashboard from './components/UserDashboard';
 import ApproverDashboard from './components/ApproverDashboard';
 
@@ -32,7 +32,7 @@ const App = () => {
                     <Route path="/login" element={<Login setToken={setToken} />} />
                     <Route path="/register" element={<Register />} />
             
-                    <Route path="/apply" element={<ApplicationForm />} />
+                    {/* <Route path="/apply" element={<ProtectedRoute element={<ApplicationForm />} isInitiator={isInitiator} />} /> */}
                     <Route path="/review" element={<Review />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/notifications" element={<Notifications />} />

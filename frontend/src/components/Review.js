@@ -27,30 +27,30 @@ const Review = () => {
 
         fetchApplications();
     }, []);
+
     const handleReview = async (applicationId) => {
         try {
             if (status === 'selected') {
                 // Send to approver
                 await axios.put(`http://localhost:5000/api/applications/${applicationId}/send-to-approver`, {
-                    details: selectedApplication.details, // Include the details
                     remark
                 }, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
                 setSuccessMessage('Application sent to approver successfully!'); // Success message
             } else if (status === 'unselected') {
-                // Provide remark to user
+                // Provide remark to user and delete application
                 await axios.put(`http://localhost:5000/api/applications/${applicationId}/remark`, {
                     remark
                 }, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
-                setSuccessMessage('Remark submitted successfully!'); // Success message
+                setSuccessMessage('Remark submitted and application deleted successfully!'); // Success message
             }
-    
+
             // Remove the reviewed application from the state
             setApplications(applications.filter(app => app._id !== applicationId));
-    
+
             // Clear the form
             setRemark('');
             setStatus('');
@@ -59,7 +59,7 @@ const Review = () => {
             if (err.response && err.response.status === 403) {
                 setError('You do not have permission to perform this action.'); // Handle permission error
             } else {
-                setError('Error submitting review'); // Handle other errors
+                setError('Error submitting review'); // Handle other errors // Handle other errors
             }
         }
     };

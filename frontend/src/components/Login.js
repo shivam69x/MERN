@@ -34,11 +34,11 @@ const Login = () => {
             // Check the user's role and navigate accordingly
             const role = response.data.role; // Assuming the role is returned in the response
             if (role === 'reviewer') {
-                navigate('/reviewer-dashboard'); // Redirect to reviewer dashboard
+                navigate('/review'); // Redirect to reviewer dashboard
             } else if (role === 'approver') {
                 navigate('/approver-dashboard'); // Redirect to approver dashboard
             } else {
-                navigate('/user-dashboard'); // Redirect to user dashboard for regular users
+                navigate('/apply'); // Redirect to user dashboard for regular users
             }
         } catch (error) {
             console.error('Login failed', error);

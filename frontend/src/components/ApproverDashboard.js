@@ -1,35 +1,34 @@
-// src/components/ApproverDashboard.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const ApproverDashboard = ({ token }) => {
-    const [applications, setApplications] = useState([]);
-    const [error, setError] = useState('');
+    const [applications, setApplications] = useState([]); // State to hold applications
+    const [error, setError] = useState(''); // State for error messages
+
+    const fetchApprovedApplications = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/applications/approved', {
+                headers: { Authorization: `Bearer ${token}` } // Use the passed token
+            });
+            console.log('Approved applications fetched:', response.data); // Log the fetched applications
+            setApplications(response.data); // Set the approved applications
+        } catch (error) {
+            console.error('Error fetching approved applications:', error);
+            setError('Error fetching approved applications'); // Handle error state
+        }
+    };
 
     useEffect(() => {
-        const fetchApplications = async () => {
-            try {
-                const response = await axios.get('http://localhost:5000/api/applications/approved', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setApplications(response.data);
-            } catch (error) {
-                console.error('Error fetching approved applications:', error);
-                setError('Failed to load approved applications.');
-            }
-        };
-
-        fetchApplications();
+        fetchApprovedApplications();
     }, [token]);
 
     const handleApprove = async (applicationId) => {
         try {
             await axios.put(`http://localhost:5000/api/applications/${applicationId}/approve`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` } // Include the token in the header
             });
-            // Refresh the applications list after approval
-            setApplications(applications.filter(app => app._id !== applicationId));
             alert('Application approved successfully.');
+            fetchApprovedApplications(); // Refresh the applications list after approval
         } catch (error) {
             console.error('Error approving application:', error);
             setError('Failed to approve application.');
@@ -39,11 +38,10 @@ const ApproverDashboard = ({ token }) => {
     const handleReject = async (applicationId) => {
         try {
             await axios.put(`http://localhost:5000/api/applications/${applicationId}/reject`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` } // Include the token in the header
             });
-            // Refresh the applications list after rejection
-            setApplications(applications.filter(app => app._id !== applicationId));
             alert('Application rejected successfully.');
+            fetchApprovedApplications(); // Refresh the applications list after rejection
         } catch (error) {
             console.error('Error rejecting application:', error);
             setError('Failed to reject application.');
@@ -58,7 +56,6 @@ const ApproverDashboard = ({ token }) => {
                 applications.map(app => (
                     <div key={app._id}>
                         <h3>Application ID: {app._id}</h3>
-                        <p>{app.details}</p>
                         <button onClick={() => handleApprove(app._id)}>Approve</button>
                         <button onClick={() => handleReject(app._id)}>Reject</button>
                     </div>

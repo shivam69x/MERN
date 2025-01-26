@@ -5,7 +5,7 @@ const router = express.Router();
 const User = require('../models/User'); // Adjust the path as necessary
 
 // Allowed roles
-const allowedRoles = ['user', 'reviewer', 'approver'];
+const allowedRoles = ['reviewer', 'approver', 'initiator'];
 
 // Registration route
 router.post('/register', async (req, res) => {
@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
     const newUser  = new User({
         email,
         password: hashedPassword,
-        role
+        role // This can now be 'initiator', 'reviewer', or 'approver'
     });
 
     try {

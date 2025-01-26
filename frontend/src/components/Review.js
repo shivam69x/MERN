@@ -1,4 +1,3 @@
-// src/components/Review.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -9,6 +8,7 @@ const Review = () => {
     const [status, setStatus] = useState(''); // State for the selected action (selected/unselected)
     const [error, setError] = useState(''); // State for error messages
     const [loading, setLoading] = useState(true); // Loading state
+    const [successMessage, setSuccessMessage] = useState(''); // State for success messages
 
     // Fetch applications when the component mounts
     useEffect(() => {
@@ -27,17 +27,17 @@ const Review = () => {
 
         fetchApplications();
     }, []);
-
-    // Handle review submission
     const handleReview = async (applicationId) => {
         try {
             if (status === 'selected') {
                 // Send to approver
                 await axios.put(`http://localhost:5000/api/applications/${applicationId}/send-to-approver`, {
+                    details: selectedApplication.details, // Include the details
                     remark
                 }, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
+                setSuccessMessage('Application sent to approver successfully!'); // Success message
             } else if (status === 'unselected') {
                 // Provide remark to user
                 await axios.put(`http://localhost:5000/api/applications/${applicationId}/remark`, {
@@ -45,11 +45,12 @@ const Review = () => {
                 }, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
+                setSuccessMessage('Remark submitted successfully!'); // Success message
             }
-
+    
             // Remove the reviewed application from the state
             setApplications(applications.filter(app => app._id !== applicationId));
-
+    
             // Clear the form
             setRemark('');
             setStatus('');
@@ -62,7 +63,6 @@ const Review = () => {
             }
         }
     };
-
     // Loading state
     if (loading) {
         return <p>Loading applications...</p>; // Loading message
@@ -75,7 +75,7 @@ const Review = () => {
                 applications.map(app => (
                     <div key={app._id}>
                         <h3>Application ID: {app._id}</h3>
-                        <p>{app.details}</p> {/* Display application details */}
+
                         <button onClick={() => setSelectedApplication(app)}>Review</button>
                     </div>
                 ))
@@ -99,6 +99,7 @@ const Review = () => {
                 </div>
             )}
             {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message */}
+            {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>} {/* Display success message */}
         </div>
     );
 };

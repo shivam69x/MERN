@@ -9,7 +9,6 @@ import UserProfile from './components/UserProfile';
 import Notifications from './components/Notifications';
 
 import UserDashboard from './components/UserDashboard';
-import ReviewerDashboard from './components/ReviewerDashboard';
 import ApproverDashboard from './components/ApproverDashboard';
 
 // NotFound component for 404 errors
@@ -39,7 +38,7 @@ const App = () => {
                     <Route path="/notifications" element={<Notifications />} />
 
                     <Route path="/user-dashboard" element={<UserDashboard token={token} />} /> {/* Pass token */}
-                    <Route path="/reviewer-dashboard" element={<ReviewerDashboard token={token} />} /> {/* Pass token */}
+                  
                     <Route path="/approver-dashboard" element={<ApproverDashboard token={token} />} /> {/* Pass token */}
                     <Route path="*" element={<NotFound />} /> {/* Catch-all for 404 */}
                 </Routes>
